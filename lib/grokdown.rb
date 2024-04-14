@@ -1,4 +1,6 @@
-require "grokdown/version"
+# frozen_string_literal: true
+
+require_relative "grokdown/version"
 
 module Grokdown
   class Error < StandardError; end
