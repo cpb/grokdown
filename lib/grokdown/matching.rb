@@ -1,5 +1,5 @@
-require 'commonmarker/node'
-require 'grokdown'
+require "commonmarker/node"
+require "grokdown"
 
 module Grokdown
   module Matching
@@ -11,11 +11,11 @@ module Grokdown
       end
 
       def matches?(node)
-        @@knowns.any? {|i| i.matches?(node)}
+        @@knowns.any? { |i| i.matches?(node) }
       end
 
       def for(node)
-        @@knowns.find {|i| i.matches?(node)}
+        @@knowns.find { |i| i.matches?(node) }
       end
 
       alias_method :===, :matches?

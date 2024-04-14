@@ -8,16 +8,14 @@ module Grokdown
       false
     end
 
-    def method_missing(name,*args,**kargs,&block)
-      if kargs.empty?
-        @node.send(name,*args,&block)
-      else
-        @node.send(name,*args,**kargs,&block)
-      end
+    def respond_to_missing?(name)
+      @node.respond_to?(name)
     end
 
-    def node
-      @node
+    def method_missing(name, ...)
+      @node.send(name, ...)
     end
+
+    attr_reader :node
   end
 end

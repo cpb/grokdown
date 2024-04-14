@@ -1,7 +1,7 @@
-require 'commonmarker'
-require 'grokdown'
-require 'grokdown/matching'
-require 'grokdown/never_consumes'
+require "commonmarker"
+require "grokdown"
+require "grokdown/matching"
+require "grokdown/never_consumes"
 
 module Grokdown
   class Document
@@ -9,7 +9,7 @@ module Grokdown
       @walk = []
       @nodes = []
 
-      CommonMarker.render_doc(markdown,options,extensions).reduce(self) do |doc, node|
+      CommonMarker.render_doc(markdown, options, extensions).reduce(self) do |doc, node|
         decorated_node = case node
         when Matching
           Matching.for(node).build(node)
@@ -22,7 +22,8 @@ module Grokdown
     end
 
     def push(node)
-      case node when Matching
+      case node
+      when Matching
         _push(node)
       when Array
         node.each do |n|
@@ -36,7 +37,7 @@ module Grokdown
     end
 
     private def _push(node)
-      if accepts = @walk.reverse.find {|i| i.consumes?(node) }
+      if (accepts = @walk.reverse.find { |i| i.consumes?(node) })
         accepts.consume(node)
       else
         @nodes.push(node)
