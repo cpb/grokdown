@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["me@cpb.ca"]
 
   spec.summary = \
-  spec.description = %q{Grok Markdown documents with Ruby objects.}
+    spec.description = %q{Grok Markdown documents with Ruby objects.}
   spec.homepage = "https://github.com/cpb/grokdown"
   spec.license = "MIT"
 
