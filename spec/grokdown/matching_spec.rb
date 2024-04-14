@@ -27,6 +27,20 @@ RSpec.describe Grokdown::Matching do
     expect(described_class.for(text)).to be_nil
   end
 
-  it ".matches? with an object an extending class matches"
+  it ".matches? with an object an extending class matches" do
+    described_module = described_class
+    Class.new do
+      extend described_module
+      match { |node| node.type == :link }
+    end
+
+    doc, paragraph, link, text = *CommonMarker.render_doc("[text](https://host.com)").walk
+
+    expect(described_class).to_not be_matches(doc)
+    expect(described_class).to_not be_matches(paragraph)
+    expect(described_class).to be_matches(link)
+    expect(described_class).to_not be_matches(text)
+  end
+
   it ".for with an object an extending class matches"
 end
