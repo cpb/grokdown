@@ -6,9 +6,6 @@ module Grokdown
       base.send(:include, InstanceMethods)
     end
 
-    mod = self
-    define_method(:recurse) { mod }
-
     def create(many: false, &block)
       @create = block
       @create_many = many
