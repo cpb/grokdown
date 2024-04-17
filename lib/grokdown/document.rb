@@ -9,7 +9,7 @@ module Grokdown
       @walk = []
       @nodes = []
 
-      CommonMarker.render_doc(markdown, options, extensions).reduce(self) do |doc, node|
+      CommonMarker.render_doc(markdown, options, extensions).walk.reduce(self) do |doc, node|
         decorated_node = case node
         when Matching
           Matching.for(node).build(node)
