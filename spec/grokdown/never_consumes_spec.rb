@@ -12,4 +12,5 @@ RSpec.describe Grokdown::NeverConsumes do
   it { is_expected.to_not be_consumes }
   it { is_expected.to_not be_consumes(subject) }
   it { is_expected.to have_attributes(type: :text, first_child: nil) }
+  it { is_expected.to eq(described_class.new(CommonMarker.render_doc("text").walk.to_a.last)) }
 end
