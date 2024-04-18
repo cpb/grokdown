@@ -1,17 +1,63 @@
 # Grokdown
 
-Grok Markdown documents with Ruby objects. Have fun using whats inside Markdown documents, without all of the pain of walking a document tree.
+Deserialize Markdown to Ruby objects.
 
-## Grok
+## Usage
 
-> - to understand intuitively or by empathy, to establish rapport with
-> - to empathize or communicate sympathetically (with); also, to experience
->   enjoyment
+- Extracting License information from README.md
 
-## Markdown
+```ruby
+require "grokdown"
 
-> Markdown allows you to write using an easy-to-read, easy-to-write plain text
-> format, then convert it to structurally valid XHTML (or HTML).
+class Text < String
+  include Grokdown
+
+  def consumes?(*) = false
+
+  match { |node| node.type == :text }
+  create { |node| node.string_content }
+end
+
+class Link < Struct.new(:href, :title, :text, keyword_init: true)
+  include Grokdown
+
+  match { |node| node.type == :link }
+  create { |node| {href: node.url, title: node.title} }
+  consumes text => :text=
+end
+
+class License < Struct.new(:text, :href, :name, :link, keyword_init: true)
+  include Grokdown
+
+  match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "License" }
+  consumes text => :text=, link => :link=
+
+  extend Forwardable
+
+  def_delegator :link, :href
+
+  def link=(link)
+    self[:link] = link
+    license = self
+    link.on(:text) do |value|
+      license.name = value
+    end
+  end
+end
+
+class Readme < Struct.new(:license, :rest)
+  include Grokdown
+
+  match { |node| node.type == :document }
+
+  consumes License => :license=, Grokdown::NeverConsumes => :rest=
+end
+
+readme, *_ = Grokdown::Document.new(File.read("README.md"))
+
+puts readme.license.name
+# fetch license at url
+```
 
 ## Installation
 
