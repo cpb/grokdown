@@ -2,6 +2,8 @@
 
 require "spec_helper"
 require "forwardable"
+require "grokdown/matching"
+require "grokdown/document"
 
 RSpec.describe Grokdown do
   around do |example|

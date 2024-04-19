@@ -1,6 +1,6 @@
 require "spec_helper"
 require "commonmarker"
-require_relative "../../lib/grokdown/creating"
+require "grokdown/creating"
 
 RSpec.describe Grokdown::Creating do
   it ".build initializes from Array arguments returned by the .create many: true block given a node" do

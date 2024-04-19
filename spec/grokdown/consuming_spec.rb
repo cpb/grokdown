@@ -1,6 +1,6 @@
 require "spec_helper"
 require "commonmarker"
-require_relative "../../lib/grokdown/consuming"
+require "grokdown/consuming"
 
 RSpec.describe Grokdown::Consuming do
   it "#consume? a node with class mapped by .consumes is true" do

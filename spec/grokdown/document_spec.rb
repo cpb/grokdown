@@ -1,7 +1,7 @@
 require "spec_helper"
-require_relative "../../lib/grokdown/document"
-require_relative "../../lib/grokdown/creating"
-require_relative "../../lib/grokdown/consuming"
+require "grokdown/document"
+require "grokdown/creating"
+require "grokdown/consuming"
 
 RSpec.describe Grokdown::Document do
   around do |example|
