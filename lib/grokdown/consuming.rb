@@ -17,9 +17,14 @@ module Grokdown
 
     def consume(inst, node)
       @consumables ||= {}
-      inst.send(@consumables.fetch(node.class), node)
-    rescue KeyError
-      raise ArgumentError, "#{inst.class} cannot consume #{node.class}"
+
+      consuming_method = @consumables.fetch(node.class) {
+        raise ArgumentError, "#{inst.class} cannot consume #{node.class}"
+      }
+
+      inst.send(consuming_method, node)
+    rescue ArgumentError => e
+      raise ArgumentError, "#{inst.class}##{consuming_method} #{e.message}"
     end
 
     module InstanceMethods

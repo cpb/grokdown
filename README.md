@@ -23,14 +23,26 @@ class Link < Struct.new(:href, :title, :text, keyword_init: true)
 
   match { |node| node.type == :link }
   create { |node| {href: node.url, title: node.title} }
-  consumes text => :text=
+  consumes Text => :text=
+
+  def on_text( &block)
+    @text_callback = block
+  end
+
+  def text=(new_text)
+    return if self[:text]
+
+    @text_callback&.call(new_text)
+
+    self[:text] = new_text
+  end
 end
 
 class License < Struct.new(:text, :href, :name, :link, keyword_init: true)
   include Grokdown
 
   match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "License" }
-  consumes text => :text=, link => :link=
+  consumes Text => :text=, Link => :link=
 
   extend Forwardable
 
@@ -39,24 +51,32 @@ class License < Struct.new(:text, :href, :name, :link, keyword_init: true)
   def link=(link)
     self[:link] = link
     license = self
-    link.on(:text) do |value|
+    link.on_text do |value|
       license.name = value
     end
   end
 end
 
-class Readme < Struct.new(:license, :rest)
+Struct.new(:text, :link, :keyword_init) do
+  include described_module
+
+  match { |node| node.type == :header && node.header_level == 2 }
+  consumes Text => :text=, Link => :link=
+end
+
+class Readme < Struct.new(:license)
   include Grokdown
 
   match { |node| node.type == :document }
 
-  consumes License => :license=, Grokdown::NeverConsumes => :rest=
+  consumes License => :license=
 end
 
-readme, *_ = Grokdown::Document.new(File.read("README.md"))
+readme = Grokdown::Document.new(File.read("README.md")).first
 
 puts readme.license.name
 # fetch license at url
+readme.license.href
 ```
 
 ## Installation
