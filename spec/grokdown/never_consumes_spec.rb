@@ -1,6 +1,6 @@
 require "spec_helper"
 require "commonmarker"
-require_relative "../../lib/grokdown/never_consumes"
+require "grokdown/never_consumes"
 
 RSpec.describe Grokdown::NeverConsumes do
   subject do

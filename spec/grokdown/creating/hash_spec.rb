@@ -1,6 +1,6 @@
 require "spec_helper"
 require "commonmarker"
-require_relative "../../../lib/grokdown/creating"
+require "grokdown/creating"
 
 RSpec.describe Grokdown::Creating, "Hash" do
   subject do

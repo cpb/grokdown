@@ -1,5 +1,5 @@
 require "spec_helper"
-require_relative "../../lib/grokdown/matching"
+require "grokdown/matching"
 
 RSpec.describe Grokdown::Matching do
   around do |example|

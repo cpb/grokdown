@@ -1,6 +1,6 @@
 require "spec_helper"
 require "commonmarker"
-require_relative "../../../lib/grokdown/matching"
+require "grokdown/matching"
 
 RSpec.describe Grokdown::Matching, "extending Class" do
   around do |example|
