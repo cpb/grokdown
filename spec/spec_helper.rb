@@ -12,4 +12,12 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  # TODO: consider a builder of an instance/singleton
+  config.around(:each) do |example|
+    old_knowns = Grokdown::Matching.class_variable_get(:@@knowns)
+    Grokdown::Matching.class_variable_set(:@@knowns, [])
+    example.run
+    Grokdown::Matching.class_variable_set(:@@knowns, old_knowns)
+  end
 end

@@ -4,13 +4,6 @@ require "grokdown/creating"
 require "grokdown/consuming"
 
 RSpec.describe Grokdown::Document do
-  around do |example|
-    old_knowns = Grokdown::Matching.class_variable_get(:@@knowns)
-    Grokdown::Matching.class_variable_set(:@@knowns, [])
-    example.run
-    Grokdown::Matching.class_variable_set(:@@knowns, old_knowns)
-  end
-
   it "#initialized with a markdown file, creates an iterable, walk-able list of Grokdown::NeverConsumes from the children of the document" do
     doc, paragraph, link, text = *CommonMarker.render_doc("[text](https://host.com)").walk
 

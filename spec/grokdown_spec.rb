@@ -6,13 +6,6 @@ require "grokdown/matching"
 require "grokdown/document"
 
 RSpec.describe Grokdown do
-  around do |example|
-    old_knowns = Grokdown::Matching.class_variable_get(:@@knowns)
-    Grokdown::Matching.class_variable_set(:@@knowns, [])
-    example.run
-    Grokdown::Matching.class_variable_set(:@@knowns, old_knowns)
-  end
-
   it "can deserialize README.md to model the license with some structs" do
     described_module = described_class
 
