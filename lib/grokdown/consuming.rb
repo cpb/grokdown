@@ -23,6 +23,8 @@ module Grokdown
       }
 
       inst.send(consuming_method, node)
+    rescue NoMethodError => e
+      raise NoMethodError, "#{node.class} cannot be passed as argument to #{e.message}"
     rescue ArgumentError => e
       raise ArgumentError, "#{inst.class}##{consuming_method} #{e.message}"
     end
