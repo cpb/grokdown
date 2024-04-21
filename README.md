@@ -82,9 +82,11 @@ readme.license.href
 ## Installation
 
 Install the gem and add to the application's Gemfile by executing:
+
     $ bundle add grokdown
 
 If bundler is not being used to manage dependencies, install the gem by executing:
+
     $ gem install grokdown
 
 ## Development

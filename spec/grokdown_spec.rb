@@ -38,15 +38,31 @@ RSpec.describe Grokdown do
       end
     end
 
-    license = Struct.new(:text, :href, :name, :link, keyword_init: true) do
+    code = Class.new(String) do
+      include described_module
+
+      match { |node| node.type == :code_block }
+      create { |node| node.string_content.chomp }
+    end
+
+    paragraph = Struct.new(:text, :code, keyword_init: true) {
+      include described_module
+
+      match { |node| node.type == :paragraph }
+      consumes text => :text=, code => :code=
+    }
+
+    license = Struct.new(:paragraph, :href, :name, :link, keyword_init: true) do
       include described_module
 
       match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "License" }
-      consumes text => :text=, link => :link=
+      consumes paragraph => :paragraph=, link => :link=
 
       extend Forwardable
 
       def_delegator :link, :href
+
+      def_delegator :paragraph, :text
 
       def link=(link)
         self[:link] = link
@@ -57,33 +73,52 @@ RSpec.describe Grokdown do
       end
     end
 
-    code = Class.new(String) do
+    usage = Struct.new(:paragraph, keyword_init: true) do
       include described_module
-
-      match { |node| node.type == :code_block && node.fence_info == "ruby" }
-      create { |node| node.string_content }
-    end
-
-    usage = Struct.new(:text, :code, keyword_init: true) do
-      include described_module
+      extend Forwardable
 
       match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "Usage" }
-      consumes text => :text=, code => :code=
+      consumes paragraph => :paragraph=, text => :on_header_text
+
+      def on_header_text(text)
+      end
+
+      def_delegators :paragraph, :text, :code
     end
 
-    Struct.new(:text, :link, :code, :keyword_init) do
+    installation = Struct.new(:alternatives, keyword_init: true) do
+      include described_module
+      extend Forwardable
+
+      match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "Installation" }
+      consumes paragraph => :on_alternative, text => :on_header_text
+
+      def on_header_text(text)
+      end
+
+      def on_alternative(alternative)
+        self.alternatives ||= []
+        alternatives.push(alternative)
+      end
+    end
+
+    Struct.new(:text, :link, :code, :paragraph, :keyword_init) do
       include described_module
 
       match { |node| node.type == :header && node.header_level == 2 }
-      consumes text => :text=, link => :link=, code => :code=
+      consumes text => :text=, link => :link=, code => :code=, paragraph => :paragraph=
     end
 
-    Struct.new(:license, :usage, keyword_init: true) do
+    Struct.new(:license, :usage, :installation, :rest, keyword_init: true) do
       include described_module
 
       match { |node| node.type == :document }
 
-      consumes license => :license=, usage => :usage=
+      consumes license => :license=, usage => :usage=, installation => :installation=, paragraph => :on_paragraph
+
+      def rest = self[:rest] ||= []
+
+      def on_paragraph(paragraph) = rest.push(paragraph)
     end
 
     readme = Grokdown::Document.new(Pathname.new(__FILE__).dirname.join("../README.md").read).first
@@ -93,6 +128,17 @@ RSpec.describe Grokdown do
       .and have_attributes(href: "https://opensource.org/licenses/MIT")
       .and have_attributes(text: "The gem is available as open source under the terms of the ")
 
+    expect(readme.installation.alternatives)
+      .to match_array([
+        have_attributes(
+          text: "Install the gem and add to the application's Gemfile by executing:",
+          code: "$ bundle add grokdown"
+        ),
+        have_attributes(
+          text: "If bundler is not being used to manage dependencies, install the gem by executing:",
+          code: "$ gem install grokdown"
+        )
+      ])
     Grokdown::Matching.class_variable_set(:@@knowns, [])
 
     expect do
