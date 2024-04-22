@@ -19,7 +19,8 @@ RSpec.describe Grokdown::Document do
 
       def consumes?(*) = false
 
-      match { |node| node.type == :text }
+      def self.matches_node?(node) = node.type == :text
+
       create { |node| node.string_content }
     end
 
@@ -28,7 +29,8 @@ RSpec.describe Grokdown::Document do
       extend Grokdown::Creating
       extend Grokdown::Consuming
 
-      match { |node| node.type == :link }
+      def self.matches_node?(node) = node.type == :link
+
       create { |node| {href: node.url, title: node.title} }
       consumes text => :text=
     end

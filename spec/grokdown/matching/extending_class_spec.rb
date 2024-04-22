@@ -22,7 +22,7 @@ RSpec.describe Grokdown::Matching, "extending Class" do
   end
 
   it ".matches? to a CommonMarker::Node instance using the block passed to .match" do
-    subject.match { |node| node.type == :link }
+    def subject.matches_node?(node) = node.type == :link
 
     doc, paragraph, link, text = *CommonMarker.render_doc("[text](https://host.com)").walk
 
