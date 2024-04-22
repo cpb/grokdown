@@ -22,11 +22,11 @@ module Grokdown
     end
 
     def match(&block)
-      @matcher = block
+      define_singleton_method(:matches_node?, &block)
     end
 
     def matches?(node)
-      node.is_a?(self) || (node.is_a?(CommonMarker::Node) && @matcher.call(node))
+      node.is_a?(self) || (node.is_a?(CommonMarker::Node) && matches_node?(node))
     end
 
     alias_method :===, :matches?
