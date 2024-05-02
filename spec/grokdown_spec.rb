@@ -16,7 +16,7 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :text
 
-      create { |node| node.string_content }
+      def self.arguments_from_node(node) = node.string_content
     end
 
     link = Struct.new(:href, :title, :text, keyword_init: true) do
@@ -24,7 +24,8 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :link
 
-      create { |node| {href: node.url, title: node.title} }
+      def self.arguments_from_node(node) = {href: node.url, title: node.title}
+
       consumes text => :text=
 
       def on_text(&block)
@@ -45,7 +46,7 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :code_block
 
-      create { |node| node.string_content.chomp }
+      def self.arguments_from_node(node) = node.string_content.chomp
     end
 
     paragraph = Struct.new(:text, :code, keyword_init: true) {
