@@ -10,10 +10,10 @@ RSpec.describe Grokdown::Creating, "Hash" do
     end
   end
 
-  it ".build initializes from Hash arguments returned by the .create block given a node" do
+  it ".build initializes from Hash arguments returned by the .arguments_from_node hook method given a node" do
     _doc, _paragraph, link, _text = *CommonMarker.render_doc("[the node text](https://host.com)").walk
 
-    subject.create { |node| {text: node.first_child.string_content} }
+    def subject.arguments_from_node(node) = {text: node.first_child.string_content}
 
     expect(subject.build(link)).to have_attributes(
       keys: [:text],
