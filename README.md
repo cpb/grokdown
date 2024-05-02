@@ -16,7 +16,7 @@ class Text < String
 
   def self.matches_node?(node) = node.type == :text
 
-  create { |node| node.string_content }
+  def self.arguments_from_node(node) = node.string_content
 end
 
 class Link < Struct.new(:href, :title, :text, keyword_init: true)
@@ -24,7 +24,7 @@ class Link < Struct.new(:href, :title, :text, keyword_init: true)
 
   def self.matches_node?(node) = node.type == :link
 
-  create { |node| {href: node.url, title: node.title} }
+  def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
   consumes Text => :text=
 
