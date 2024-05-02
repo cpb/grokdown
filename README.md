@@ -15,6 +15,7 @@ class Text < String
   def consumes?(*) = false
 
   def self.matches_node?(node) = node.type == :text
+
   create { |node| node.string_content }
 end
 
@@ -22,7 +23,9 @@ class Link < Struct.new(:href, :title, :text, keyword_init: true)
   include Grokdown
 
   def self.matches_node?(node) = node.type == :link
+
   create { |node| {href: node.url, title: node.title} }
+
   consumes Text => :text=
 
   def on_text( &block)
@@ -42,6 +45,7 @@ class License < Struct.new(:text, :href, :name, :link, keyword_init: true)
   include Grokdown
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
+
   consumes Text => :text=, Link => :link=
 
   extend Forwardable
@@ -61,6 +65,7 @@ Struct.new(:text, :link, :keyword_init) do
   include described_module
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2
+
   consumes Text => :text=, Link => :link=
 end
 
