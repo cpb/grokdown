@@ -12,14 +12,15 @@ RSpec.describe Grokdown::Document do
     expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverConsumes.new(doc), Grokdown::NeverConsumes.new(paragraph), Grokdown::NeverConsumes.new(link), Grokdown::NeverConsumes.new(text)])
   end
 
-  it "with some Classes with Grokdown::Matching.match, builds matching instances with Grokdown::Matching.create, and reshapes the tree a bit with Growkdown::Consuming.consumes", :aggregate_failures do
+  it "with some Classes with Grokdown::Matching.matches_node?, builds matching instances with Grokdown::Matching.create, and reshapes the tree a bit with Growkdown::Consuming.consumes", :aggregate_failures do
     text = Class.new(String) do
       extend Grokdown::Matching
       extend Grokdown::Creating
 
       def consumes?(*) = false
 
-      match { |node| node.type == :text }
+      def self.matches_node?(node) = node.type == :text
+
       create { |node| node.string_content }
     end
 
@@ -28,7 +29,8 @@ RSpec.describe Grokdown::Document do
       extend Grokdown::Creating
       extend Grokdown::Consuming
 
-      match { |node| node.type == :link }
+      def self.matches_node?(node) = node.type == :link
+
       create { |node| {href: node.url, title: node.title} }
       consumes text => :text=
     end

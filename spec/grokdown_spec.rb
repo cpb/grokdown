@@ -14,14 +14,16 @@ RSpec.describe Grokdown do
 
       def consumes?(*) = false
 
-      match { |node| node.type == :text }
+      def self.matches_node?(node) = node.type == :text
+
       create { |node| node.string_content }
     end
 
     link = Struct.new(:href, :title, :text, keyword_init: true) do
       include described_module
 
-      match { |node| node.type == :link }
+      def self.matches_node?(node) = node.type == :link
+
       create { |node| {href: node.url, title: node.title} }
       consumes text => :text=
 
@@ -41,21 +43,24 @@ RSpec.describe Grokdown do
     code = Class.new(String) do
       include described_module
 
-      match { |node| node.type == :code_block }
+      def self.matches_node?(node) = node.type == :code_block
+
       create { |node| node.string_content.chomp }
     end
 
     paragraph = Struct.new(:text, :code, keyword_init: true) {
       include described_module
 
-      match { |node| node.type == :paragraph }
+      def self.matches_node?(node) = node.type == :paragraph
+
       consumes text => :text=, code => :code=
     }
 
     license = Struct.new(:paragraph, :href, :name, :link, keyword_init: true) do
       include described_module
 
-      match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "License" }
+      def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
+
       consumes paragraph => :paragraph=, link => :link=
 
       extend Forwardable
@@ -77,7 +82,8 @@ RSpec.describe Grokdown do
       include described_module
       extend Forwardable
 
-      match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "Usage" }
+      def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "Usage"
+
       consumes paragraph => :paragraph=, text => :on_header_text
 
       def on_header_text(text)
@@ -90,7 +96,8 @@ RSpec.describe Grokdown do
       include described_module
       extend Forwardable
 
-      match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "Installation" }
+      def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "Installation"
+
       consumes paragraph => :on_alternative, text => :on_header_text
 
       def on_header_text(text)
@@ -105,14 +112,15 @@ RSpec.describe Grokdown do
     Struct.new(:text, :link, :code, :paragraph, :keyword_init) do
       include described_module
 
-      match { |node| node.type == :header && node.header_level == 2 }
+      def self.matches_node?(node) = node.type == :header && node.header_level == 2
+
       consumes text => :text=, link => :link=, code => :code=, paragraph => :paragraph=
     end
 
     Struct.new(:license, :usage, :installation, :rest, keyword_init: true) do
       include described_module
 
-      match { |node| node.type == :document }
+      def self.matches_node?(node) = node.type == :document
 
       consumes license => :license=, usage => :usage=, installation => :installation=, paragraph => :on_paragraph
 

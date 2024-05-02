@@ -14,15 +14,18 @@ class Text < String
 
   def consumes?(*) = false
 
-  match { |node| node.type == :text }
+  def self.matches_node?(node) = node.type == :text
+
   create { |node| node.string_content }
 end
 
 class Link < Struct.new(:href, :title, :text, keyword_init: true)
   include Grokdown
 
-  match { |node| node.type == :link }
+  def self.matches_node?(node) = node.type == :link
+
   create { |node| {href: node.url, title: node.title} }
+
   consumes Text => :text=
 
   def on_text( &block)
@@ -41,7 +44,8 @@ end
 class License < Struct.new(:text, :href, :name, :link, keyword_init: true)
   include Grokdown
 
-  match { |node| node.type == :header && node.header_level == 2 && node.first_child.string_content == "License" }
+  def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
+
   consumes Text => :text=, Link => :link=
 
   extend Forwardable
@@ -60,14 +64,15 @@ end
 Struct.new(:text, :link, :keyword_init) do
   include described_module
 
-  match { |node| node.type == :header && node.header_level == 2 }
+  def self.matches_node?(node) = node.type == :header && node.header_level == 2
+
   consumes Text => :text=, Link => :link=
 end
 
 class Readme < Struct.new(:license)
   include Grokdown
 
-  match { |node| node.type == :document }
+  def self.matches_node?(node) = node.type == :document
 
   consumes License => :license=
 end

@@ -31,7 +31,7 @@ RSpec.describe Grokdown::Matching do
     described_module = described_class
     Class.new do
       extend described_module
-      match { |node| node.type == :link }
+      def self.matches_node?(node) = node.type == :link
     end
 
     doc, paragraph, link, text = *CommonMarker.render_doc("[text](https://host.com)").walk
@@ -47,7 +47,7 @@ RSpec.describe Grokdown::Matching do
 
     type = Class.new do
       extend described_module
-      match { |node| node.type == :link }
+      def self.matches_node?(node) = node.type == :link
     end
 
     doc, paragraph, link, text = *CommonMarker.render_doc("[text](https://host.com)").walk
