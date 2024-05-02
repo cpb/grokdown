@@ -12,7 +12,7 @@ RSpec.describe Grokdown::Document do
     expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverConsumes.new(doc), Grokdown::NeverConsumes.new(paragraph), Grokdown::NeverConsumes.new(link), Grokdown::NeverConsumes.new(text)])
   end
 
-  it "with some Classes with Grokdown::Matching.match, builds matching instances with Grokdown::Matching.create, and reshapes the tree a bit with Growkdown::Consuming.consumes", :aggregate_failures do
+  it "with some Classes with Grokdown::Matching.matches_node?, builds matching instances with Grokdown::Matching.create, and reshapes the tree a bit with Growkdown::Consuming.consumes", :aggregate_failures do
     text = Class.new(String) do
       extend Grokdown::Matching
       extend Grokdown::Creating
