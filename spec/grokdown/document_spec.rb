@@ -13,7 +13,7 @@ RSpec.describe Grokdown::Document do
   end
 
   it "with some Classes with Grokdown::Matching.matches_node?, builds matching instances with Grokdown::Matching.arguments_from_node, and reshapes the tree a bit with Growkdown::Consuming.consumes", :aggregate_failures do
-    text = Class.new(String) do
+    stub_const("Text", Class.new(String) do
       extend Grokdown::Matching
       extend Grokdown::Creating
 
@@ -22,9 +22,9 @@ RSpec.describe Grokdown::Document do
       def self.matches_node?(node) = node.type == :text
 
       def self.arguments_from_node(node) = node.string_content
-    end
+    end)
 
-    link = Struct.new(:href, :title, :text, keyword_init: true) do
+    stub_const("Link", Struct.new(:href, :title, :text, keyword_init: true) do
       extend Grokdown::Matching
       extend Grokdown::Creating
       extend Grokdown::Consuming
@@ -33,12 +33,12 @@ RSpec.describe Grokdown::Document do
 
       def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-      consumes text => :text=
-    end
+      consumes Text => :text=
+    end)
 
     doc, paragraph, *_rest = *CommonMarker.render_doc("[text](https://host.com)").walk
 
-    expect(described_class.new("[text](https://host.com)").each.to_a).to eq([Grokdown::NeverConsumes.new(doc), Grokdown::NeverConsumes.new(paragraph), link.new(href: "https://host.com", title: "", text: "text")])
-    expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverConsumes.new(doc), Grokdown::NeverConsumes.new(paragraph), link.new(href: "https://host.com", title: "", text: "text"), "text"])
+    expect(described_class.new("[text](https://host.com)").each.to_a).to eq([Grokdown::NeverConsumes.new(doc), Grokdown::NeverConsumes.new(paragraph), Link.new(href: "https://host.com", title: "", text: "text")])
+    expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverConsumes.new(doc), Grokdown::NeverConsumes.new(paragraph), Link.new(href: "https://host.com", title: "", text: "text"), "text"])
   end
 end
