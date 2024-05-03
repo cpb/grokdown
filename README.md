@@ -12,8 +12,6 @@ require "grokdown"
 class Text < String
   include Grokdown
 
-  def consumes?(*) = false
-
   def self.matches_node?(node) = node.type == :text
 
   def self.arguments_from_node(node) = node.string_content
@@ -26,7 +24,12 @@ class Link < Struct.new(:href, :title, :text, keyword_init: true)
 
   def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-  consumes Text => :text=
+  def self.aggregate_node(inst, node)
+    case node
+    when Text
+      inst.text = node
+    end
+  end
 
   def on_text( &block)
     @text_callback = block
@@ -46,7 +49,14 @@ class License < Struct.new(:text, :href, :name, :link, keyword_init: true)
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
 
-  consumes Text => :text=, Link => :link=
+  def self.aggregate_node(inst, node)
+    case node
+    when Text
+      inst.text = node
+    when Link
+      inst.link = node
+    end
+  end
 
   extend Forwardable
 
@@ -66,7 +76,14 @@ Struct.new(:text, :link, :keyword_init) do
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2
 
-  consumes Text => :text=, Link => :link=
+  def self.aggregate_node(inst, node)
+    case node
+    when Text
+      inst.text = node
+    when Link
+      inst.link = node
+    end
+  end
 end
 
 class Readme < Struct.new(:license)
@@ -74,7 +91,12 @@ class Readme < Struct.new(:license)
 
   def self.matches_node?(node) = node.type == :document
 
-  consumes License => :license=
+  def self.aggregate_node(inst, node)
+    case node
+    when License
+      inst.license = node
+    end
+  end
 end
 
 readme = Grokdown::Document.new(File.read("README.md")).first
