@@ -9,24 +9,27 @@ RSpec.describe Grokdown do
   it "can deserialize README.md to model the license and usage with some structs" do
     described_module = described_class
 
-    text = Class.new(String) do
+    stub_const("Text", Class.new(String) do
       include described_module
-
-      def consumes?(*) = false
 
       def self.matches_node?(node) = node.type == :text
 
       def self.arguments_from_node(node) = node.string_content
-    end
+    end)
 
-    link = Struct.new(:href, :title, :text, keyword_init: true) do
+    stub_const("Link", Struct.new(:href, :title, :text, keyword_init: true) do
       include described_module
 
       def self.matches_node?(node) = node.type == :link
 
       def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-      consumes text => :text=
+      def self.aggregate_node(inst, node)
+        case node
+        when Text
+          inst.text = node
+        end
+      end
 
       def on_text(&block)
         @text_callback = block
@@ -39,30 +42,44 @@ RSpec.describe Grokdown do
 
         self[:text] = new_text
       end
-    end
+    end)
 
-    code = Class.new(String) do
+    stub_const("Code", Class.new(String) do
       include described_module
 
       def self.matches_node?(node) = node.type == :code_block
 
       def self.arguments_from_node(node) = node.string_content.chomp
-    end
+    end)
 
-    paragraph = Struct.new(:text, :code, keyword_init: true) {
+    stub_const("Paragraph", Struct.new(:text, :code, keyword_init: true) {
       include described_module
 
       def self.matches_node?(node) = node.type == :paragraph
 
-      consumes text => :text=, code => :code=
-    }
+      def self.aggregate_node(inst, node)
+        case node
+        when Text
+          inst.text = node
+        when Code
+          inst.code = node
+        end
+      end
+    })
 
-    license = Struct.new(:paragraph, :href, :name, :link, keyword_init: true) do
+    stub_const("License", Struct.new(:paragraph, :href, :name, :link, keyword_init: true) do
       include described_module
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
 
-      consumes paragraph => :paragraph=, link => :link=
+      def self.aggregate_node(inst, node)
+        case node
+        when Paragraph
+          inst.paragraph = node
+        when Link
+          inst.link = node
+        end
+      end
 
       extend Forwardable
 
@@ -77,29 +94,43 @@ RSpec.describe Grokdown do
           license.name = value
         end
       end
-    end
+    end)
 
-    usage = Struct.new(:paragraph, keyword_init: true) do
+    stub_const("Usage", Struct.new(:paragraph, keyword_init: true) do
       include described_module
       extend Forwardable
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "Usage"
 
-      consumes paragraph => :paragraph=, text => :on_header_text
+      def self.aggregate_node(inst, node)
+        case node
+        when Paragraph
+          inst.paragraph = node
+        when Text
+          inst.on_header_text(node)
+        end
+      end
 
       def on_header_text(text)
       end
 
       def_delegators :paragraph, :text, :code
-    end
+    end)
 
-    installation = Struct.new(:alternatives, keyword_init: true) do
+    stub_const("Installation", Struct.new(:alternatives, keyword_init: true) do
       include described_module
       extend Forwardable
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "Installation"
 
-      consumes paragraph => :on_alternative, text => :on_header_text
+      def self.aggregate_node(inst, node)
+        case node
+        when Paragraph
+          inst.on_alternative(node)
+        when Text
+          inst.on_header_text(node)
+        end
+      end
 
       def on_header_text(text)
       end
@@ -108,14 +139,25 @@ RSpec.describe Grokdown do
         self.alternatives ||= []
         alternatives.push(alternative)
       end
-    end
+    end)
 
     Struct.new(:text, :link, :code, :paragraph, :keyword_init) do
       include described_module
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2
 
-      consumes text => :text=, link => :link=, code => :code=, paragraph => :paragraph=
+      def self.aggregate_node(inst, node)
+        case node
+        when Text
+          inst.text = node
+        when Link
+          inst.link = node
+        when Code
+          inst.code = node
+        when Paragraph
+          inst.paragraph = node
+        end
+      end
     end
 
     Struct.new(:license, :usage, :installation, :rest, keyword_init: true) do
@@ -123,7 +165,18 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :document
 
-      consumes license => :license=, usage => :usage=, installation => :installation=, paragraph => :on_paragraph
+      def self.aggregate_node(inst, node)
+        case node
+        when License
+          inst.license = node
+        when Usage
+          inst.usage = node
+        when Installation
+          inst.installation = node
+        when Paragraph
+          inst.on_paragraph(node)
+        end
+      end
 
       def rest = self[:rest] ||= []
 

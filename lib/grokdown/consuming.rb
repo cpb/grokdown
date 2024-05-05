@@ -6,27 +6,48 @@ module Grokdown
       base.send(:include, InstanceMethods)
     end
 
-    def consumes?(node)
-      @consumables ||= {}
-      @consumables.has_key?(node.class)
+    class ConsumesChecker < BasicObject
+      def initialize
+        @aggregated = false
+        super
+      end
+
+      def aggregated? = @aggregated
+
+      def respond_to_missing?(*) = true
+
+      def method_missing(method, node, ...)
+        @aggregated = true
+      end
     end
 
-    def consumes(mapping = {})
-      @consumables = mapping
+    def consumes?(node)
+      if respond_to?(:aggregate_node)
+        inst = ConsumesChecker.new
+        aggregate_node(inst, node)
+        inst.aggregated?
+      else
+        @consumables ||= {}
+        @consumables.has_key?(node.class)
+      end
     end
 
     def consume(inst, node)
-      @consumables ||= {}
+      raise ArgumentError, "#{inst.class} cannot consume #{node.class}" unless consumes?(node)
 
-      consuming_method = @consumables.fetch(node.class) {
-        raise ArgumentError, "#{inst.class} cannot consume #{node.class}"
-      }
+      begin
+        return aggregate_node(inst, node) if respond_to?(:aggregate_node)
 
-      inst.send(consuming_method, node)
+        @consumables ||= {}
+
+        consuming_method = @consumables[node.class]
+
+        inst.send(consuming_method, node)
+      rescue ArgumentError => e
+        raise ArgumentError, "#{inst.class}##{consuming_method} #{e.message}"
+      end
     rescue NoMethodError => e
       raise NoMethodError, "#{node.class} cannot be passed as argument to #{e.message}"
-    rescue ArgumentError => e
-      raise ArgumentError, "#{inst.class}##{consuming_method} #{e.message}"
     end
 
     module InstanceMethods
