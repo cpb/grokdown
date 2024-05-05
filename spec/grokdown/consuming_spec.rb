@@ -3,28 +3,38 @@ require "commonmarker"
 require "grokdown/consuming"
 
 RSpec.describe Grokdown::Consuming do
-  it "#consume? a node with class mapped by .consumes is true" do
+  it "#consume? returns true if Grokdown::Consuming.aggregate_node passed node-instance of a class mapped by .aggregrate_node is true" do
     described_module = described_class
 
     type = Class.new do
       extend described_module
+
+      def self.aggregate_node(inst, node)
+        case node
+        when CommonMarker::Node
+          inst.gimme(node)
+        end
+      end
     end
 
     _doc, _paragraph, link, _text = *CommonMarker.render_doc("[the node text](https://host.com)").walk
 
-    type.consumes CommonMarker::Node => :gimme
-
     expect(type.new).to be_consumes(link)
   end
 
-  it "#consume? a node with class not mapped by .consumes is false" do
+  it "#consume? a node with class not mapped by .aggregrate_node is false" do
     described_module = described_class
 
     type = Class.new do
       extend described_module
-    end
 
-    type.consumes CommonMarker::Node => :gimme
+      def self.aggregate_node(inst, node)
+        case node
+        when CommonMarker::Node
+          inst.gimme(node)
+        end
+      end
+    end
 
     expect(type.new).not_to be_consumes(Class.new.new)
   end
@@ -35,12 +45,17 @@ RSpec.describe Grokdown::Consuming do
     type = Class.new do
       extend described_module
 
+      def self.aggregate_node(inst, node)
+        case node
+        when CommonMarker::Node
+          inst.gimme(node)
+        end
+      end
+
       def gimme(node) = node
     end
 
     _doc, _paragraph, link, _text = *CommonMarker.render_doc("[the node text](https://host.com)").walk
-
-    type.consumes CommonMarker::Node => :gimme
 
     consumer = type.new
 
@@ -56,9 +71,14 @@ RSpec.describe Grokdown::Consuming do
 
     type = Class.new do
       extend described_module
-    end
 
-    type.consumes CommonMarker::Node => :gimme
+      def self.aggregate_node(inst, node)
+        case node
+        when CommonMarker::Node
+          inst.gimme(node)
+        end
+      end
+    end
 
     consumer = type.new
 
@@ -72,9 +92,14 @@ RSpec.describe Grokdown::Consuming do
 
     type = Class.new do
       extend described_module
-    end
 
-    type.consumes CommonMarker::Node => :gimme
+      def self.aggregate_node(inst, node)
+        case node
+        when CommonMarker::Node
+          inst.gimme(node)
+        end
+      end
+    end
 
     consumer = type.new
 
