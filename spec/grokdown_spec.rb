@@ -154,7 +154,16 @@ RSpec.describe Grokdown do
           code: "$ gem install grokdown"
         )
       ])
-    Grokdown::Matching.class_variable_set(:@@knowns, [])
+
+    readme.usage.each do |example|
+      Grokdown::Matching.class_variable_set(:@@knowns, [])
+
+      example.files.each do |name, contents|
+        write_file name, contents
+      end
+
+      # TK …
+    end
 
     expect do
       expect(Module.new.module_eval(readme.usage.code, "README.md", 10)).to eq("https://opensource.org/licenses/MIT")

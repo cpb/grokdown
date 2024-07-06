@@ -4,7 +4,15 @@ Deserialize Markdown to Ruby objects.
 
 ## Usage
 
-- Extracting License information from README.md
+### Extracting License information from README.md
+
+Create a `.grokdown` file which defines types to build from markdown nodes, then use the `grokdown` CLI to extract the license name with:
+
+```sh
+grokdown -e "Document.new(File.read('README.md')).first.license.name"
+```
+
+##### `.grokdown`
 
 ```ruby
 require "grokdown"
@@ -73,12 +81,6 @@ Readme = Struct.new(:license) do
 
   def add_license(node) = self.license = node
 end
-
-readme = Grokdown::Document.new(File.read("README.md")).first
-
-puts readme.license.name
-# fetch license at url
-readme.license.href
 ```
 
 ## Installation
