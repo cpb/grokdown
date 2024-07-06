@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require "forwardable"
+require "optparse"
 
 require "bundler/setup"
 
@@ -11,4 +12,10 @@ document_definition = Pathname.glob(".grokdown").find { _1.exist? }
 
 load document_definition
 
-puts Grokdown::Document.new(File.read("README.md")).first.license.name
+parser = OptionParser.new
+
+parser.on("-e [ruby expression]", "Ruby expression to evaluate after loading the Grokdown document definition") do |value|
+  puts Grokdown.module_eval(value)
+end
+
+parser.parse!

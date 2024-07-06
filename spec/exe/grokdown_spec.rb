@@ -135,9 +135,10 @@ RSpec.describe "grokdown", type: :aruba do
         end
       end
     GROKDOWN_CONTENTS
-
-    run_command("grokdown -e 'Document.new(File.read(\"README.md\")).first.license.name'")
   end
 
-  it { expect(last_command_started).to have_output "MIT License" }
+  it "-e 'Document.new(File.read(\"README.md\")).first.license.name' outputs MIT License" do
+    run_command("grokdown -e 'Document.new(File.read(\"README.md\")).first.license.name'")
+    expect(last_command_started).to have_output "MIT License"
+  end
 end
