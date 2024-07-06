@@ -10,3 +10,5 @@ gem "rake"
 gem "rspec"
 
 gem "standard"
+
+gem "aruba", "~> 2.2"
