@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "aruba/rspec"
+
 require "grokdown"
 require "grokdown/matching"
 
