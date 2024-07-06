@@ -58,7 +58,7 @@ License = Struct.new(:text, :href, :name, :link, keyword_init: true) do
 end
 
 Struct.new(:text, :link, :keyword_init) do
-  include described_module
+  include Grokdown
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2
 

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "grokdown/version"
-require_relative "grokdown/creating"
 require_relative "grokdown/composing"
+require_relative "grokdown/creating"
+require_relative "grokdown/matching"
+require_relative "grokdown/version"
 
 module Grokdown
   class Error < StandardError; end

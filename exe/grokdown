@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+require "forwardable"
+
+require "bundler/setup"
+
+require "grokdown"
+require "grokdown/document"
+
+document_definition = Pathname.glob(".grokdown").find { _1.exist? }
+
+load document_definition
+
+puts Grokdown::Document.new(File.read("README.md")).first.license.name
