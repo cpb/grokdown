@@ -45,6 +45,14 @@ RSpec.describe Grokdown do
       def self.arguments_from_node(node) = node.string_content.chomp
     end)
 
+    stub_const("Literal", Class.new(String) do
+      include described_module
+
+      def self.matches_node?(node) = node.type == :code
+
+      def self.arguments_from_node(node) = node.string_content.chomp
+    end)
+
     stub_const("Paragraph", Struct.new(:text, :code, keyword_init: true) {
       include described_module
 
@@ -77,7 +85,7 @@ RSpec.describe Grokdown do
       def_delegator :paragraph, :text
     end)
 
-    stub_const("Usage", Struct.new(:paragraph, keyword_init: true) do
+    stub_const("Usage", Struct.new(:paragraph, :examples, keyword_init: true) do
       include described_module
       extend Forwardable
 
@@ -85,10 +93,54 @@ RSpec.describe Grokdown do
 
       def add_paragraph(node) = self.paragraph = node
 
+      def add_usage_example(node)
+        self.examples ||= []
+        self.examples.push node
+      end
+
       def add_text(node)
       end
 
       def_delegators :paragraph, :text, :code
+    end)
+
+    stub_const("UsageExample", Struct.new(:name, :instructions, :files, :shell_command, keyword_init: true) do
+      include described_module
+
+      def self.matches_node?(node) = node.type == :header && node.header_level == 3
+
+      def self.aggregate_node(inst, node)
+        case node
+        when Paragraph
+          inst.on_paragraph(node)
+        when Text
+          inst.name = node
+        when ExampleFile
+          inst.files ||= []
+          inst.files.push(node)
+        when Code
+          inst.shell_command = node
+        end
+      end
+
+      def on_paragraph(node) = self.instructions = node.node.to_commonmark
+    end)
+
+    stub_const("ExampleFile", Struct.new(:name, :contents, keyword_init: true) do
+      include described_module
+
+      def self.matches_node?(node) = node.type == :header && node.header_level == 5
+
+      def self.aggregate_node(inst, node)
+        binding.irb
+        return false if inst.name && inst.contents
+        case node
+        when Literal
+          inst.name = node
+        when Code
+          inst.contents = node
+        end
+      end
     end)
 
     stub_const("Installation", Struct.new(:alternatives, keyword_init: true) do
@@ -155,15 +207,17 @@ RSpec.describe Grokdown do
         )
       ])
 
-    readme.usage.each do |example|
-      Grokdown::Matching.class_variable_set(:@@knowns, [])
-
+    binding.irb
+    readme.usage.examples.each do |example|
       example.files.each do |name, contents|
-        write_file name, contents
+        binding.irb
+        # write_file name, contents
       end
 
       # TK …
     end
+
+    Grokdown::Matching.class_variable_set(:@@knowns, [])
 
     expect do
       expect(Module.new.module_eval(readme.usage.code, "README.md", 10)).to eq("https://opensource.org/licenses/MIT")
