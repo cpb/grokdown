@@ -26,9 +26,6 @@ module Grokdown
         inst = ConsumesChecker.new
         aggregate_node(inst, node)
         inst.aggregated?
-      else
-        @consumables ||= {}
-        @consumables.has_key?(node.class)
       end
     end
 
@@ -37,12 +34,6 @@ module Grokdown
 
       begin
         return aggregate_node(inst, node) if respond_to?(:aggregate_node)
-
-        @consumables ||= {}
-
-        consuming_method = @consumables[node.class]
-
-        inst.send(consuming_method, node)
       rescue ArgumentError => e
         raise ArgumentError, "#{inst.class}##{consuming_method} #{e.message}"
       end
