@@ -12,10 +12,11 @@ RSpec.describe Grokdown::Document do
     expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverConsumes.new(doc), Grokdown::NeverConsumes.new(paragraph), Grokdown::NeverConsumes.new(link), Grokdown::NeverConsumes.new(text)])
   end
 
-  it "with some Classes with Grokdown::Matching.matches_node?, builds matching instances with Grokdown::Matching.arguments_from_node, and assigns aggregated types to members using Grokdown::Consuming.aggregate_node", :aggregate_failures do
+  it "with some Classes with Grokdown::Matching.matches_node?, builds matching instances with Grokdown::Matching.arguments_from_node, and composes aggregated root entities Grokdown::Composing conventional composition methods", :aggregate_failures do
     stub_const("Text", Class.new(String) do
       extend Grokdown::Matching
       extend Grokdown::Creating
+      extend Grokdown::Composing
       extend Grokdown::Consuming
 
       def self.matches_node?(node) = node.type == :text
@@ -32,11 +33,8 @@ RSpec.describe Grokdown::Document do
 
       def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Text
-          inst.text = node
-        end
+      def add_text(node)
+        self.text = node
       end
     end)
 
