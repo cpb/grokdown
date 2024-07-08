@@ -24,18 +24,16 @@ RSpec.describe Grokdown do
 
       def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-      def add_text(node) = self.text = node
+      def add_text(node)
+        return if text
+
+        @text_callback&.call(node)
+
+        self.text = node
+      end
 
       def on_text(&block)
         @text_callback = block
-      end
-
-      def text=(new_text)
-        return if self[:text]
-
-        @text_callback&.call(new_text)
-
-        self[:text] = new_text
       end
     end)
 
