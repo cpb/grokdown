@@ -24,12 +24,7 @@ RSpec.describe Grokdown do
 
       def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Text
-          inst.text = node
-        end
-      end
+      def add_text(node) = self.text = node
 
       def on_text(&block)
         @text_callback = block
@@ -57,14 +52,9 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :paragraph
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Text
-          inst.text = node
-        when Code
-          inst.code = node
-        end
-      end
+      def add_text(node) = self.text = node
+
+      def add_code(node) = self.code = node
     })
 
     stub_const("License", Struct.new(:paragraph, :href, :name, :link, keyword_init: true) do
@@ -72,14 +62,9 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Paragraph
-          inst.paragraph = node
-        when Link
-          inst.link = node
-        end
-      end
+      def add_paragraph(node) = self.paragraph = node
+
+      def add_link(node) = self.link = node
 
       extend Forwardable
 
@@ -102,14 +87,9 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "Usage"
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Paragraph
-          inst.paragraph = node
-        when Text
-          inst.on_header_text(node)
-        end
-      end
+      def add_paragraph(node) = self.paragraph = node
+
+      def add_text(node) = on_header_text(node)
 
       def on_header_text(text)
       end
@@ -123,14 +103,9 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "Installation"
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Paragraph
-          inst.on_alternative(node)
-        when Text
-          inst.on_header_text(node)
-        end
-      end
+      def add_paragraph(node) = on_alternative(node)
+
+      def add_text(node) = on_header_text(node)
 
       def on_header_text(text)
       end
@@ -146,18 +121,13 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Text
-          inst.text = node
-        when Link
-          inst.link = node
-        when Code
-          inst.code = node
-        when Paragraph
-          inst.paragraph = node
-        end
-      end
+      def add_link(node) = self.link = node
+
+      def add_text(node) = self.text = node
+
+      def add_code(node) = self.code = node
+
+      def add_paragraph(node) = self.paragraph = node
     end
 
     Struct.new(:license, :usage, :installation, :rest, keyword_init: true) do
@@ -165,18 +135,13 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :document
 
-      def self.aggregate_node(inst, node)
-        case node
-        when License
-          inst.license = node
-        when Usage
-          inst.usage = node
-        when Installation
-          inst.installation = node
-        when Paragraph
-          inst.on_paragraph(node)
-        end
-      end
+      def add_license(node) = self.license = node
+
+      def add_usage(node) = self.usage = node
+
+      def add_installation(node) = self.installation = node
+
+      def add_paragraph(node) = on_paragraph(node)
 
       def rest = self[:rest] ||= []
 
