@@ -24,12 +24,12 @@ module Grokdown
     end
 
     def consumes?(node)
-      can_compose?(node)
-
       if respond_to?(:aggregate_node)
         inst = ConsumesChecker.new
         aggregate_node(inst, node)
         inst.aggregated?
+      else
+        can_compose?(node)
       end
     end
 
@@ -38,11 +38,10 @@ module Grokdown
 
       begin
         return aggregate_node(inst, node) if respond_to?(:aggregate_node)
+        inst.add_composable(node)
       rescue ArgumentError => e
         raise ArgumentError, "#{inst.class}##{consuming_method} #{e.message}"
       end
-    rescue NoMethodError => e
-      raise NoMethodError, "#{node.class} cannot be passed as argument to #{e.message}"
     end
 
     module InstanceMethods

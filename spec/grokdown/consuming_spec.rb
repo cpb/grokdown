@@ -9,11 +9,7 @@ RSpec.describe Grokdown::Consuming do
     type = Class.new do
       extend described_module
 
-      def self.aggregate_node(inst, node)
-        case node
-        when CommonMarker::Node
-          inst.gimme(node)
-        end
+      def add_common_marker_node(node)
       end
     end
 
@@ -28,11 +24,7 @@ RSpec.describe Grokdown::Consuming do
     type = Class.new do
       extend described_module
 
-      def self.aggregate_node(inst, node)
-        case node
-        when CommonMarker::Node
-          inst.gimme(node)
-        end
+      def add_common_marker_node(node)
       end
     end
 
@@ -45,11 +37,8 @@ RSpec.describe Grokdown::Consuming do
     type = Class.new do
       extend described_module
 
-      def self.aggregate_node(inst, node)
-        case node
-        when CommonMarker::Node
-          inst.gimme(node)
-        end
+      def add_common_marker_node(node)
+        gimme(node)
       end
 
       def gimme(node) = node
@@ -71,38 +60,10 @@ RSpec.describe Grokdown::Consuming do
 
     type = Class.new do
       extend described_module
-
-      def self.aggregate_node(inst, node)
-        case node
-        when CommonMarker::Node
-          inst.gimme(node)
-        end
-      end
     end
 
     consumer = type.new
 
     expect { consumer.consume(Class.new.new) }.to raise_error(ArgumentError, /cannot consume/)
-  end
-
-  it "#consume raises an NoMethodError when given a node with a class mapped to a method that isn't implemented" do
-    described_module = described_class
-
-    _doc, _paragraph, link, _text = *CommonMarker.render_doc("[the node text](https://host.com)").walk
-
-    type = Class.new do
-      extend described_module
-
-      def self.aggregate_node(inst, node)
-        case node
-        when CommonMarker::Node
-          inst.gimme(node)
-        end
-      end
-    end
-
-    consumer = type.new
-
-    expect { consumer.consume(link) }.to raise_error(NoMethodError, /gimme/)
   end
 end

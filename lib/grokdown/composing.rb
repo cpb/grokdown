@@ -14,7 +14,7 @@ module Grokdown
       def composition_method(object) = self.class.composition_method(object)
 
       def add_composable(object)
-        public_send(composition_method(object), object) if can_compose?(object)
+        public_send(composition_method(object), object)
       end
     end
   end
