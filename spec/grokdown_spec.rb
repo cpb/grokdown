@@ -131,11 +131,9 @@ RSpec.describe Grokdown do
 
       def add_installation(node) = self.installation = node
 
-      def add_paragraph(node) = on_paragraph(node)
+      def add_paragraph(node) = rest.push(node)
 
       def rest = self[:rest] ||= []
-
-      def on_paragraph(paragraph) = rest.push(paragraph)
     end
 
     readme = Grokdown::Document.new(Pathname.new(__FILE__).dirname.join("../README.md").read).first
