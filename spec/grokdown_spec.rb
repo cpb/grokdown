@@ -97,16 +97,12 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "Installation"
 
-      def add_paragraph(node) = on_alternative(node)
-
-      def add_text(node) = on_header_text(node)
-
-      def on_header_text(text)
+      def add_paragraph(node)
+        self.alternatives ||= []
+        alternatives.push(node)
       end
 
-      def on_alternative(alternative)
-        self.alternatives ||= []
-        alternatives.push(alternative)
+      def add_text(node)
       end
     end)
 
