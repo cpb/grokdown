@@ -1,8 +1,10 @@
 require "grokdown"
+require "grokdown/composing"
 
 module Grokdown
   module Consuming
     def self.extended(base)
+      base.extend(Composing)
       base.send(:include, InstanceMethods)
     end
 
@@ -22,6 +24,8 @@ module Grokdown
     end
 
     def consumes?(node)
+      can_compose?(node)
+
       if respond_to?(:aggregate_node)
         inst = ConsumesChecker.new
         aggregate_node(inst, node)

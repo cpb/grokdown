@@ -5,7 +5,7 @@ module Grokdown
     def can_compose?(object) = public_instance_methods.include?(composition_method(object))
 
     def composition_method(object)
-      :"add_#{object.class.name.downcase}"
+      :"add_#{object.class.name.downcase}" if object.class.name
     end
 
     module InstanceMethods
