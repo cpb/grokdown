@@ -3,7 +3,7 @@ require "commonmarker"
 require "grokdown/consuming"
 
 RSpec.describe Grokdown::Consuming do
-  it "#consume? returns true if Grokdown::Consuming.aggregate_node passed node-instance of a class mapped by .aggregrate_node is true" do
+  it "#consume? returns true if Grokdown::Composing conventional composition methods are defined for the passed node-instance" do
     described_module = described_class
 
     type = Class.new do
