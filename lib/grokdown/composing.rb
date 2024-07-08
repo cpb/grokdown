@@ -5,7 +5,7 @@ module Grokdown
     def can_compose?(object) = public_instance_methods.include?(composition_method(object))
 
     def composition_method(object)
-      :"add_#{object.class.name.downcase}" if object.class.name
+      :"add_#{object.class.name.gsub("::", "_").gsub(/([A-Z])(?=[A-Z][a-z])|([a-z\d])(?=[A-Z])/) { ($1 || $2) << "_" }.downcase}" if object.class.name
     end
 
     module InstanceMethods
