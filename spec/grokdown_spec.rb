@@ -85,9 +85,7 @@ RSpec.describe Grokdown do
 
       def add_paragraph(node) = self.paragraph = node
 
-      def add_text(node) = on_header_text(node)
-
-      def on_header_text(text)
+      def add_text(node)
       end
 
       def_delegators :paragraph, :text, :code
