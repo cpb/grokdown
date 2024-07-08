@@ -62,21 +62,19 @@ RSpec.describe Grokdown do
 
       def add_paragraph(node) = self.paragraph = node
 
-      def add_link(node) = self.link = node
+      def add_link(node)
+        self.link = node
+        license = self
+        link.on_text do |value|
+          license.name = value
+        end
+      end
 
       extend Forwardable
 
       def_delegator :link, :href
 
       def_delegator :paragraph, :text
-
-      def link=(link)
-        self[:link] = link
-        license = self
-        link.on_text do |value|
-          license.name = value
-        end
-      end
     end)
 
     stub_const("Usage", Struct.new(:paragraph, keyword_init: true) do
