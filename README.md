@@ -24,18 +24,11 @@ Link = Struct.new(:href, :title, :text, keyword_init: true) do
 
   def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-  def self.aggregate_node(inst, node)
-    case node
-    when Text
-      inst.text = node
-    end
-  end
-
   def on_text( &block)
     @text_callback = block
   end
 
-  def text=(new_text)
+  def add_text(new_text)
     return if self[:text]
 
     @text_callback&.call(new_text)
@@ -49,20 +42,13 @@ License = Struct.new(:text, :href, :name, :link, keyword_init: true) do
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
 
-  def self.aggregate_node(inst, node)
-    case node
-    when Text
-      inst.text = node
-    when Link
-      inst.link = node
-    end
-  end
+  def add_text(node) = self.text = node
 
   extend Forwardable
 
   def_delegator :link, :href
 
-  def link=(link)
+  def add_link(link)
     self[:link] = link
     license = self
     link.on_text do |value|
@@ -76,14 +62,8 @@ Struct.new(:text, :link, :keyword_init) do
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2
 
-  def self.aggregate_node(inst, node)
-    case node
-    when Text
-      inst.text = node
-    when Link
-      inst.link = node
-    end
-  end
+  def add_text(node) = self.text = node
+  def add_link(node) = self.link = node
 end
 
 Readme = Struct.new(:license) do
@@ -91,12 +71,7 @@ Readme = Struct.new(:license) do
 
   def self.matches_node?(node) = node.type == :document
 
-  def self.aggregate_node(inst, node)
-    case node
-    when License
-      inst.license = node
-    end
-  end
+  def add_license(node) = self.license = node
 end
 
 readme = Grokdown::Document.new(File.read("README.md")).first
