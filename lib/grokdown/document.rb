@@ -37,8 +37,8 @@ module Grokdown
     end
 
     private def _push(node)
-      if (accepts = @walk.reverse.find { |i| i.consumes?(node) })
-        accepts.consume(node)
+      if (accepts = @walk.reverse.find { |i| i.can_compose?(node) })
+        accepts.add_composable(node)
       else
         @nodes.push(node)
       end

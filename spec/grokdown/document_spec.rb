@@ -26,7 +26,7 @@ RSpec.describe Grokdown::Document do
     stub_const("Link", Struct.new(:href, :title, :text, keyword_init: true) do
       extend Grokdown::Matching
       extend Grokdown::Creating
-      extend Grokdown::Consuming
+      extend Grokdown::Composing
 
       def self.matches_node?(node) = node.type == :link
 
