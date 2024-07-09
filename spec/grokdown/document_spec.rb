@@ -1,7 +1,7 @@
 require "spec_helper"
 require "grokdown/document"
 require "grokdown/creating"
-require "grokdown/consuming"
+require "grokdown/composing"
 
 RSpec.describe Grokdown::Document do
   it "#initialized with a markdown file, creates an iterable, walk-able list of Grokdown::NeverConsumes from the children of the document" do
@@ -17,7 +17,6 @@ RSpec.describe Grokdown::Document do
       extend Grokdown::Matching
       extend Grokdown::Creating
       extend Grokdown::Composing
-      extend Grokdown::Consuming
 
       def self.matches_node?(node) = node.type == :text
 
@@ -33,9 +32,7 @@ RSpec.describe Grokdown::Document do
 
       def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-      def add_text(node)
-        self.text = node
-      end
+      def add_text(node) = self.text = node
     end)
 
     doc, paragraph, *_rest = *CommonMarker.render_doc("[text](https://host.com)").walk
