@@ -26,6 +26,17 @@ RSpec.describe Grokdown::Composing do
     stub_const("HypertextReference", Class.new)
   end
 
+  it "composition_method removes prepended anonymous module names" do
+    described_module = described_class
+
+    aggregate_root_class = Class.new { extend described_module }
+
+    anonymous_module = Module.new
+    anonymous_module.const_set(:Link, Struct.new(:text, :href) { extend described_module })
+
+    expect(aggregate_root_class.composition_method(anonymous_module::Link.new)).to eq :add_link
+  end
+
   it "can_compose? returns true if the instance can add the object's type" do
     expect(CanComposeLinks.can_compose?(Link.new)).to be_truthy
     expect(CanComposeLinks.new.can_compose?(Link.new)).to be_truthy
