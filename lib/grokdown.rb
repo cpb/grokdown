@@ -2,7 +2,7 @@
 
 require_relative "grokdown/version"
 require_relative "grokdown/creating"
-require_relative "grokdown/consuming"
+require_relative "grokdown/composing"
 
 module Grokdown
   class Error < StandardError; end
@@ -10,6 +10,6 @@ module Grokdown
   def self.included(base)
     base.extend(Matching)
     base.extend(Creating)
-    base.extend(Consuming)
+    base.extend(Composing)
   end
 end
