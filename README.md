@@ -17,7 +17,7 @@ class Text < String
   def self.arguments_from_node(node) = node.string_content
 end
 
-class Link < Struct.new(:href, :title, :text, keyword_init: true)
+Link = Struct.new(:href, :title, :text, keyword_init: true) do
   include Grokdown
 
   def self.matches_node?(node) = node.type == :link
@@ -44,7 +44,7 @@ class Link < Struct.new(:href, :title, :text, keyword_init: true)
   end
 end
 
-class License < Struct.new(:text, :href, :name, :link, keyword_init: true)
+License = Struct.new(:text, :href, :name, :link, keyword_init: true) do
   include Grokdown
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2 && node.first_child.string_content == "License"
@@ -86,7 +86,7 @@ Struct.new(:text, :link, :keyword_init) do
   end
 end
 
-class Readme < Struct.new(:license)
+Readme = Struct.new(:license) do
   include Grokdown
 
   def self.matches_node?(node) = node.type == :document
