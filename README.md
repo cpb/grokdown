@@ -12,6 +12,18 @@ Create a `.grokdown` file which defines types to build from markdown nodes, then
 grokdown -e "Document.new(File.read('README.md')).first.license.name"
 ```
 
+##### `README.md`
+
+```
+# Example Readme
+
+Simple readme with a conventional `## License` section
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+```
+
 ##### `.grokdown`
 
 ```ruby
