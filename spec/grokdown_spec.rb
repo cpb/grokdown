@@ -5,7 +5,7 @@ require "forwardable"
 require "grokdown/matching"
 require "grokdown/document"
 
-RSpec.describe Grokdown do
+RSpec.describe Grokdown, type: :aruba do
   it "can deserialize README.md to model the license and usage with some structs" do
     described_module = described_class
 
@@ -53,14 +53,24 @@ RSpec.describe Grokdown do
       def self.arguments_from_node(node) = node.string_content.chomp
     end)
 
-    stub_const("Paragraph", Struct.new(:text, :code, keyword_init: true) {
+    stub_const("Paragraph", Struct.new(:text, :code, :parent, keyword_init: true) {
       include described_module
 
       def self.matches_node?(node) = node.type == :paragraph
 
-      def add_text(node) = self.text = node
+      def append_text(node)
+        text&.<<(node) || self.text = node.to_s
+      end
 
-      def add_code(node) = self.code = node
+      def add_text(node) = append_text(node)
+
+      def add_literal(node) = append_text(node)
+
+      def add_code(node)
+        self.code = node
+
+        parent.add_composable(node) if parent&.can_compose?(node)
+      end
     })
 
     stub_const("License", Struct.new(:paragraph, :href, :name, :link, keyword_init: true) do
@@ -109,21 +119,25 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 3
 
-      def self.aggregate_node(inst, node)
-        case node
-        when Paragraph
-          inst.on_paragraph(node)
-        when Text
-          inst.name = node
-        when ExampleFile
-          inst.files ||= []
-          inst.files.push(node)
-        when Code
-          inst.shell_command = node
-        end
+      def add_text(node) = self.name = node
+
+      def add_example_file(node)
+        self.files ||= []
+        self.files.push node
       end
 
-      def on_paragraph(node) = self.instructions = node.node.to_commonmark
+      def add_code(node) = self.shell_command = node
+
+      def add_paragraph(node)
+        node.parent = self
+        self.instructions = node.node.to_commonmark
+      end
+
+      def can_compose?(node)
+        return false if shell_command && node.is_a?(Code)
+
+        super
+      end
     end)
 
     stub_const("ExampleFile", Struct.new(:name, :contents, keyword_init: true) do
@@ -131,15 +145,14 @@ RSpec.describe Grokdown do
 
       def self.matches_node?(node) = node.type == :header && node.header_level == 5
 
-      def self.aggregate_node(inst, node)
-        binding.irb
-        return false if inst.name && inst.contents
-        case node
-        when Literal
-          inst.name = node
-        when Code
-          inst.contents = node
-        end
+      def add_literal(node) = self.name = node
+
+      def add_code(node) = self.contents = node
+
+      def can_compose?(node)
+        return false if contents && node.is_a?(Code)
+
+        super
       end
     end)
 
@@ -167,7 +180,7 @@ RSpec.describe Grokdown do
 
       def add_text(node) = self.text = node
 
-      def add_code(node) = self.code = node
+      def add_code(node) = (self.code = node)
 
       def add_paragraph(node) = self.paragraph = node
     end
@@ -207,21 +220,22 @@ RSpec.describe Grokdown do
         )
       ])
 
-    binding.irb
     readme.usage.examples.each do |example|
-      example.files.each do |name, contents|
-        binding.irb
-        # write_file name, contents
+      example.files.each do |file|
+        write_file file.name, file.contents
       end
 
-      # TK …
+      run_command(example.shell_command)
+      expect(last_command_started).to have_output "MIT License"
     end
 
-    Grokdown::Matching.class_variable_set(:@@knowns, [])
-
-    expect do
-      expect(Module.new.module_eval(readme.usage.code, "README.md", 10)).to eq("https://opensource.org/licenses/MIT")
-    end.to output("MIT License\n").to_stdout
+  rescue Exception => e
+    puts e
+    raise e
+  else
+    @skip_pry = true
+  ensure
+    binding.irb unless @skip_pry
   end
 
   it "has a version number" do
