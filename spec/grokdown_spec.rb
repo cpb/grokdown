@@ -17,7 +17,7 @@ RSpec.describe Grokdown, type: :aruba do
       def self.arguments_from_node(node) = node.string_content
     end)
 
-    stub_const("Link", Struct.new(:href, :title, :text, keyword_init: true) do
+    stub_const("Link", Struct.new(:href, :title, :text, :parent, keyword_init: true) do
       include described_module
 
       def self.matches_node?(node) = node.type == :link
@@ -27,13 +27,9 @@ RSpec.describe Grokdown, type: :aruba do
       def add_text(node)
         return if text
 
-        @text_callback&.call(node)
-
         self.text = node
-      end
 
-      def on_text(&block)
-        @text_callback = block
+        parent.add_composable(node) if parent&.can_compose?(node)
       end
     end)
 
@@ -81,12 +77,11 @@ RSpec.describe Grokdown, type: :aruba do
       def add_paragraph(node) = self.paragraph = node
 
       def add_link(node)
+        node.parent = self
         self.link = node
-        license = self
-        link.on_text do |value|
-          license.name = value
-        end
       end
+
+      def add_text(node) = self.name = node
 
       extend Forwardable
 
