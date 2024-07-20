@@ -175,7 +175,7 @@ RSpec.describe Grokdown, type: :aruba do
 
       def add_text(node) = self.text = node
 
-      def add_code(node) = (self.code = node)
+      def add_code(node) = self.code = node
 
       def add_paragraph(node) = self.paragraph = node
     end
@@ -223,14 +223,6 @@ RSpec.describe Grokdown, type: :aruba do
       run_command(example.shell_command)
       expect(last_command_started).to have_output "MIT License"
     end
-
-  rescue Exception => e
-    puts e
-    raise e
-  else
-    @skip_pry = true
-  ensure
-    binding.irb unless @skip_pry
   end
 
   it "has a version number" do
