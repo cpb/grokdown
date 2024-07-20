@@ -4,7 +4,27 @@ Deserialize Markdown to Ruby objects.
 
 ## Usage
 
-- Extracting License information from README.md
+### Extracting License information from README.md
+
+Create a `.grokdown` file which defines types to build from markdown nodes, then use the `grokdown` CLI to extract the license name with:
+
+```sh
+grokdown -e "Document.new(File.read('README.md')).first.license.name"
+```
+
+##### `README.md`
+
+```
+# Example Readme
+
+Simple readme with a conventional `## License` section
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+```
+
+##### `.grokdown`
 
 ```ruby
 require "grokdown"
@@ -17,23 +37,19 @@ class Text < String
   def self.arguments_from_node(node) = node.string_content
 end
 
-Link = Struct.new(:href, :title, :text, keyword_init: true) do
+Link = Struct.new(:href, :title, :text, :parent, keyword_init: true) do
   include Grokdown
 
   def self.matches_node?(node) = node.type == :link
 
   def self.arguments_from_node(node) = {href: node.url, title: node.title}
 
-  def on_text( &block)
-    @text_callback = block
-  end
+  def add_text(node)
+    return if text
 
-  def add_text(new_text)
-    return if self[:text]
+    self.text = node
 
-    @text_callback&.call(new_text)
-
-    self[:text] = new_text
+    parent.add_composable(node) if parent&.can_compose?(node)
   end
 end
 
@@ -48,17 +64,16 @@ License = Struct.new(:text, :href, :name, :link, keyword_init: true) do
 
   def_delegator :link, :href
 
-  def add_link(link)
-    self[:link] = link
-    license = self
-    link.on_text do |value|
-      license.name = value
-    end
+  def add_link(node)
+    node.parent = self
+    self.link = node
   end
+
+  def add_text(node) = self.name = node
 end
 
 Struct.new(:text, :link, :keyword_init) do
-  include described_module
+  include Grokdown
 
   def self.matches_node?(node) = node.type == :header && node.header_level == 2
 
@@ -73,12 +88,6 @@ Readme = Struct.new(:license) do
 
   def add_license(node) = self.license = node
 end
-
-readme = Grokdown::Document.new(File.read("README.md")).first
-
-puts readme.license.name
-# fetch license at url
-readme.license.href
 ```
 
 ## Installation
