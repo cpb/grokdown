@@ -4,12 +4,12 @@ require "grokdown/creating"
 require "grokdown/composing"
 
 RSpec.describe Grokdown::Document do
-  it "#initialized with a markdown file, creates an iterable, walk-able list of Grokdown::NeverComposable from the children of the document" do
+  it "#initialized with a markdown file, creates an iterable, walk-able list of Grokdown::NeverComposes from the children of the document" do
     doc, paragraph, link, text = *CommonMarker.render_doc("[text](https://host.com)").walk
 
-    expect(described_class.new("[text](https://host.com)").each.to_a).to eq([Grokdown::NeverComposable.new(doc), Grokdown::NeverComposable.new(paragraph), Grokdown::NeverComposable.new(link), Grokdown::NeverComposable.new(text)])
+    expect(described_class.new("[text](https://host.com)").each.to_a).to eq([Grokdown::NeverComposes.new(doc), Grokdown::NeverComposes.new(paragraph), Grokdown::NeverComposes.new(link), Grokdown::NeverComposes.new(text)])
 
-    expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverComposable.new(doc), Grokdown::NeverComposable.new(paragraph), Grokdown::NeverComposable.new(link), Grokdown::NeverComposable.new(text)])
+    expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverComposes.new(doc), Grokdown::NeverComposes.new(paragraph), Grokdown::NeverComposes.new(link), Grokdown::NeverComposes.new(text)])
   end
 
   it "with some Classes with Grokdown::Matching.matches_node?, builds matching instances with Grokdown::Matching.arguments_from_node, and composes aggregated root entities Grokdown::Composing conventional composition methods", :aggregate_failures do
@@ -37,7 +37,7 @@ RSpec.describe Grokdown::Document do
 
     doc, paragraph, *_rest = *CommonMarker.render_doc("[text](https://host.com)").walk
 
-    expect(described_class.new("[text](https://host.com)").each.to_a).to eq([Grokdown::NeverComposable.new(doc), Grokdown::NeverComposable.new(paragraph), Link.new(href: "https://host.com", title: "", text: "text")])
-    expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverComposable.new(doc), Grokdown::NeverComposable.new(paragraph), Link.new(href: "https://host.com", title: "", text: "text"), "text"])
+    expect(described_class.new("[text](https://host.com)").each.to_a).to eq([Grokdown::NeverComposes.new(doc), Grokdown::NeverComposes.new(paragraph), Link.new(href: "https://host.com", title: "", text: "text")])
+    expect(described_class.new("[text](https://host.com)").walk.to_a).to eq([Grokdown::NeverComposes.new(doc), Grokdown::NeverComposes.new(paragraph), Link.new(href: "https://host.com", title: "", text: "text"), "text"])
   end
 end

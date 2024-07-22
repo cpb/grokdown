@@ -1,7 +1,7 @@
 require "delegate"
 
 module Grokdown
-  class NeverComposable < SimpleDelegator
+  class NeverComposes < SimpleDelegator
     def can_compose?(*) = false
 
     def ==(other)
