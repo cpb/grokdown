@@ -1,8 +1,24 @@
-# Grokdown
+# Grokdown: Markdown to Ruby Objects
 
-Deserialize Markdown to Ruby objects.
+`Grokdown` provides **an experimental interface** for building value objects and composing them into entities from a Markdown document tree.
 
 ## Usage
+
+Include the `Grokdown` module into ruby classes you want `Grokdown::Document` to consider building value objects from.
+
+`Grokdown::Document` depends on class methods `matches_node?` and `agruments_from_node` to select which `Grokdown` class to build and how to build an instance from a Markdown node.
+
+`Grokdown` instances can compose `Grokdown` value objects or entities by implementing instance hook methods following a naming convention. The hook method name is `add_` prefixing the snake case `Grokdown` class name of the instances a `Grokdown` instance can get added.
+
+Implementing the hook methods creates precise and resilient factories for objects from Markdown documents.
+
+Receiver | Hook method | Use case
+--- | --- | ---
+Class | `matches_node?` | Predicate to select receiving class to build from a given Markdown node|
+Class | `arguments_from_node` | Maps node values to build an instance of the class from a given Markdown node |
+Instance | `add_other_class_name` | Aggregate later `OtherClassName` instances when visiting the Markdown node tree |
+
+Simple differences in implementations of `add_` composition methods enables building useful ruby object graphs from easy to write Markdown files.
 
 ### Extracting License information from README.md
 
