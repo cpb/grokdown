@@ -1,8 +1,8 @@
 require "spec_helper"
 require "commonmarker"
-require "grokdown/never_composable"
+require "grokdown/never_composes"
 
-RSpec.describe Grokdown::NeverComposable do
+RSpec.describe Grokdown::NeverComposes do
   subject do
     _doc, _paragraph, text = *CommonMarker.render_doc("text").walk
 

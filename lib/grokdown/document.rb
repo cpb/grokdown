@@ -1,7 +1,7 @@
 require "commonmarker"
 require "grokdown"
 require "grokdown/matching"
-require "grokdown/never_composable"
+require "grokdown/never_composes"
 
 module Grokdown
   class Document
@@ -14,7 +14,7 @@ module Grokdown
         when Matching
           Matching.for(node).build(node)
         else
-          NeverComposable.new(node)
+          NeverComposes.new(node)
         end
 
         doc.push decorated_node
